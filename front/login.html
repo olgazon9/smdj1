@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Page</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <div id="login-form">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <button id="login-button">Login</button>
+    </div>
+    
+    <!-- Message element for success message -->
+    <div id="success-message" style="display: none;"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const loginButton = document.getElementById('login-button');
+            const successMessage = document.getElementById('success-message'); // Get the success message element
+
+            loginButton.addEventListener('click', () => {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                axios.post('http://127.0.0.1:8000/login/', {
+                    username: username,
+                    password: password
+                })
+                .then(response => {
+                    // Extract and store the access token in session storage
+                    const accessToken = response.data.access_token;
+                    sessionStorage.setItem('access_token', accessToken);
+
+                    // Log the access token to the console
+                    console.log('Access Token:', accessToken);
+
+                    // Show the success message
+                    successMessage.textContent = `${username} logged in successfully.`;
+                    successMessage.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
