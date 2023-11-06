@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Product List</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+</head>
+<body>
+    <h1>Product List</h1>
+    <ul id="product-list">
+    </ul>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const productList = document.getElementById('product-list');
+
+        // Make an Axios GET request to fetch the product data
+        axios.get('http://127.0.0.1:8000/products/')
+            .then(response => {
+                response.data.forEach(product => {
+                    const card = document.createElement('div');
+                    card.classList.add('card');
+                    
+                    const img = document.createElement('img');
+                    img.setAttribute('src', `http://127.0.0.1:8000${product.image}`);
+                    img.setAttribute('alt', product.name);
+                    card.appendChild(img);
+                    
+                    const namePrice = document.createElement('div');
+                    namePrice.textContent = `Name: ${product.name}, Price: ${product.price}`;
+                    card.appendChild(namePrice);
+                    
+                    productList.appendChild(card);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    </script>
+</body>
+</html>
