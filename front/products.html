@@ -17,10 +17,13 @@
         </ul>
     </div>
 
+    <button id="checkout-button" style="display: none;">Checkout</button>
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         const cardContainer = document.querySelector('.card-container');
         const cartList = document.getElementById('cart-list');
+        const checkoutButton = document.getElementById('checkout-button');
 
         // Shopping cart as an object to keep track of selected products
         let cart = {};
@@ -33,15 +36,20 @@
             cart = JSON.parse(localStorage.getItem('cart'));
         }
 
+        // Retrieve the token from sessionStorage
+        const token = sessionStorage.getItem("token");
+
         function updateCart() {
             cartList.innerHTML = '';
             for (const productId in cart) {
                 const product = cart[productId];
-                const cartItem = document.createElement('li');
-                cartItem.innerHTML = `${product.name} (Qty: ${product.quantity})
-                    <button onclick="addToCart('${productId}')">+</button>
-                    <button onclick="removeFromCart('${productId}')">-</button>`;
-                cartList.appendChild(cartItem);
+                if (product && product.name) {
+                    const cartItem = document.createElement('li');
+                    cartItem.innerHTML = `${product.name} (Qty: ${product.quantity})
+                        <button onclick="addToCart('${productId}')">+</button>
+                        <button onclick="removeFromCart('${productId}')">-</button>`;
+                    cartList.appendChild(cartItem);
+                }
             }
         }
 
@@ -74,32 +82,58 @@
         axios.get('http://127.0.0.1:8000/products/')
             .then(response => {
                 productsData = response.data; // Store product data for later use
+                updateCart(); // Update the cart after loading the products
                 productsData.forEach(product => {
                     const card = document.createElement('div');
                     card.classList.add('card');
-                    
+
                     const img = document.createElement('img');
                     img.setAttribute('src', `http://127.0.0.1:8000${product.image}`);
                     img.setAttribute('alt', product.name);
                     card.appendChild(img);
-                    
+
                     const namePrice = document.createElement('div');
                     namePrice.textContent = `Name: ${product.name}, Price: ${product.price}`;
                     card.appendChild(namePrice);
-                    
+
                     // Add a Buy button
                     const buyButton = document.createElement('button');
                     buyButton.textContent = 'Buy';
                     buyButton.addEventListener('click', () => addToCart(product.id));
                     card.appendChild(buyButton);
-                    
+
                     cardContainer.appendChild(card);
                 });
                 updateCart(); // Update the cart after loading the products
+
+                // Show the checkout button for authenticated users
+                if (token) {
+                    checkoutButton.style.display = 'block';
+                }
             })
             .catch(error => {
                 console.error('Error:', error);
             });
+
+        // Event listener for the checkout button
+        checkoutButton.addEventListener('click', () => {
+            // Define the cart data and send it to the server with the token
+            const cartData = cart;
+            axios.post('http://127.0.0.1:8000/api/checkout/', cartData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                console.log('Checkout successful:', response.data);
+                cart = {}; // Clear the cart after successful checkout
+                saveCartToLocalStorage();
+                updateCart();
+            })
+            .catch(error => {
+                console.error('Error during checkout:', error);
+            });
+        });
     </script>
 </body>
 </html>

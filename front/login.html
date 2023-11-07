@@ -1,31 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Login Page</title>
+    <title>Login</title>
 </head>
 <body>
     <h1>Login</h1>
-    <div id="login-form">
+    <form id="login-form">
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-        <br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        <br>
-        <button id="login-button">Login</button>
-    </div>
-    
-    <!-- Message element for success message -->
-    <div id="success-message" style="display: none;"></div>
+        <input type="text" id="username" name="username" required><br>
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <label for "password">Password:</label>
+        <input type="password" id="password" name="password" required><br>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <div id="token-display"></div>
+
+    <a href="products.html">Go to Products</a>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.22.0/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.1/js.cookie.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jwt-decode/3.1.2/jwt-decode.min.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const loginButton = document.getElementById('login-button');
-            const successMessage = document.getElementById('success-message'); // Get the success message element
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginForm = document.getElementById('login-form');
+            const tokenDisplay = document.getElementById('token-display');
 
-            loginButton.addEventListener('click', () => {
+            loginForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+
                 const username = document.getElementById('username').value;
                 const password = document.getElementById('password').value;
 
@@ -33,20 +37,19 @@
                     username: username,
                     password: password
                 })
-                .then(response => {
-                    // Extract and store the access token in session storage
-                    const accessToken = response.data.access_token;
-                    sessionStorage.setItem('access_token', accessToken);
-
-                    // Log the access token to the console
-                    console.log('Access Token:', accessToken);
-
-                    // Show the success message
-                    successMessage.textContent = `${username} logged in successfully.`;
-                    successMessage.style.display = 'block';
+                .then(function (response) {
+                    // Handle a successful login
+                    const token = response.data.access;
+                    // Save the token in session storage
+                    sessionStorage.setItem('access_token', token);
+                    // Display token in console log
+                    console.log(`Token: ${token}`);
+                    // Display a message in the HTML page
+                    tokenDisplay.textContent = `${username} is logged in`;
                 })
-                .catch(error => {
-                    console.error('Error:', error);
+                .catch(function (error) {
+                    // Handle login error
+                    tokenDisplay.textContent = 'Login failed';
                 });
             });
         });

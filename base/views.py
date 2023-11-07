@@ -2,13 +2,40 @@ from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Product
-from .serializers import ProductSerializer
+from .models import Product, Order, OrderDetails
+from .serializers import ProductSerializer, OrderDetailsSerializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User
+from rest_framework import status
+
+
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def checkout(request):
+    cart_data = request.data  # Assuming the data sent from the client is a dictionary representing the cart
+
+    # Create a new order and associate it with the authenticated user
+    order = Order.objects.create(user=request.user)
+
+    # Process each item in the cart and create OrderDetails for each item
+    order_details = []
+    for product_id, item in cart_data.items():
+        product = product.objects.get(id=product_id)
+        quantity = item['quantity']
+        price = product.price
+        order_details.append(OrderDetails(order=order, product=product, quantity=quantity, price=price))
+
+    # Save the order details to the database
+    OrderDetails.objects.bulk_create(order_details)
+
+    return Response({'message': 'Checkout successful'}, status=status.HTTP_201_CREATED)
+
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
