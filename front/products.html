@@ -17,7 +17,7 @@
         </ul>
     </div>
 
-    <button id="checkout-button" style="display: none;">Checkout</button>
+    <button id="checkout-button" style="display: block;">Checkout</button>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
@@ -119,7 +119,7 @@
         checkoutButton.addEventListener('click', () => {
             // Define the cart data and send it to the server with the token
             const cartData = cart;
-            axios.post('http://127.0.0.1:8000/api/checkout/', cartData, {
+            axios.post('http://127.0.0.1:8000/checkout/', cartData, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
