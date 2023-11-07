@@ -14,27 +14,44 @@ from rest_framework import status
 
 
 
+class CheckoutView(APIView):
+    permission_classes = [IsAuthenticated]
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def checkout(request):
-    cart_data = request.data  # Assuming the data sent from the client is a dictionary representing the cart
+    def post(self, request):
+        cart_data = request.data  # Assuming the data sent from the client is a dictionary representing the cart
 
-    # Create a new order and associate it with the authenticated user
-    order = Order.objects.create(user=request.user)
+        # Create a new order and associate it with the authenticated user
+        order = Order.objects.create(user=request.user)
 
-    # Process each item in the cart and create OrderDetails for each item
-    order_details = []
-    for product_id, item in cart_data.items():
-        product = product.objects.get(id=product_id)
-        quantity = item['quantity']
-        price = product.price
-        order_details.append(OrderDetails(order=order, product=product, quantity=quantity, price=price))
+        # Process each item in the cart and create OrderDetails for each item
+        order_details = []
 
-    # Save the order details to the database
-    OrderDetails.objects.bulk_create(order_details)
+        for product_id, item in cart_data.items():
+            try:
+                product = Product.objects.get(id=product_id)
+            except Product.DoesNotExist:
+                return Response({'message': f'Product with ID {product_id} does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response({'message': 'Checkout successful'}, status=status.HTTP_201_CREATED)
+            quantity = item.get('quantity', 1)  # Default to 1 if quantity is not provided
+            price = product.price
+
+            # Calculate the total price for this item
+            total_price = price * quantity
+
+            # Create an OrderDetails instance and append it to the list
+            order_detail = OrderDetails(
+                order=order,
+                product=product,
+                quantity=quantity,
+                price=price,
+                total_price=total_price
+            )
+            order_details.append(order_detail)
+
+        # Save the order details to the database
+        OrderDetails.objects.bulk_create(order_details)
+
+        return Response({'message': 'Checkout successful'}, status=status.HTTP_201_CREATED)
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):

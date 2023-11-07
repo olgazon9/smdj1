@@ -26,13 +26,13 @@
         document.addEventListener('DOMContentLoaded', function () {
             const loginForm = document.getElementById('login-form');
             const tokenDisplay = document.getElementById('token-display');
-
+    
             loginForm.addEventListener('submit', function (event) {
                 event.preventDefault();
-
+    
                 const username = document.getElementById('username').value;
                 const password = document.getElementById('password').value;
-
+    
                 axios.post('http://127.0.0.1:8000/login/', {
                     username: username,
                     password: password
@@ -41,7 +41,7 @@
                     // Handle a successful login
                     const token = response.data.access;
                     // Save the token in session storage
-                    sessionStorage.setItem('access_token', token);
+                    sessionStorage.setItem('token', token); // Corrected key
                     // Display token in console log
                     console.log(`Token: ${token}`);
                     // Display a message in the HTML page
