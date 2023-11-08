@@ -1,9 +1,10 @@
+import genericpath
 from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Product, Order, OrderDetails
-from .serializers import ProductSerializer, OrderDetailsSerializer
+from .serializers import OrderSerializer, ProductSerializer, OrderDetailsSerializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
@@ -11,12 +12,30 @@ from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User
 from rest_framework import status
 
-
+from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Order, OrderDetails, Product
 
+
+class OrderHistoryView(generics.ListAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Filter orders for the authenticated user
+        return Order.objects.filter(user=self.request.user)
+
+class OrderDetailsView(generics.ListAPIView):
+    queryset = OrderDetails.objects.all()
+    serializer_class = OrderDetailsSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Filter order details for the authenticated user
+        return OrderDetails.objects.filter(order__user=self.request.user)
 class CheckoutView(APIView):
     permission_classes = [IsAuthenticated]
 

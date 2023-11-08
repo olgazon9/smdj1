@@ -16,16 +16,19 @@
         <ul id="cart-list">
         </ul>
     </div>
-    <p id="checkout-message"></p>
 
+    <p id="checkout-message"></p>
     
     <button id="checkout-button" style="display: block;">Checkout</button>
+    <button id="logout-button">Logout</button> <!-- Add the Logout button -->
+    <button id="order-history-button">Order History</button>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         const cardContainer = document.querySelector('.card-container');
         const cartList = document.getElementById('cart-list');
         const checkoutButton = document.getElementById('checkout-button');
+        const logoutButton = document.getElementById('logout-button'); // Get the Logout button element
 
         // Shopping cart as an object to keep track of selected products
         let cart = {};
@@ -117,39 +120,67 @@
                 console.error('Error:', error);
             });
 
-// Event listener for the checkout button
-checkoutButton.addEventListener('click', () => {
-    // Create a JSON object that matches the expected format
-    const cartData = {
-        "1": {
-            "quantity": 2
-        },
-        "2": {
-            "quantity": 1
-        },
-    };
+        // Event listener for the checkout button
+        checkoutButton.addEventListener('click', () => {
+            // Create a JSON object that matches the expected format
+            const cartData = {
+                "1": {
+                    "quantity": 2
+                },
+                "2": {
+                    "quantity": 1
+                },
+            };
 
-    axios.post('http://127.0.0.1:8000/checkout/', cartData, {
+            axios.post('http://127.0.0.1:8000/checkout/', cartData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                console.log('Checkout successful:', response.data);
+                cart = {}; // Clear the cart after successful checkout
+                saveCartToLocalStorage();
+                updateCart();
+
+                // Display the user's name after a successful checkout
+                const checkoutMessage = document.getElementById('checkout-message');
+                checkoutMessage.textContent = `Checkout successful for ${response.data.username}`;
+            })
+            .catch(error => {
+                console.error('Error during checkout:', error);
+            });
+        });
+
+        // Event listener for the logout button
+        logoutButton.addEventListener('click', () => {
+            // Remove the token from session storage
+            sessionStorage.removeItem('token');
+            // Display a message indicating the user is logged out
+            const checkoutMessage = document.getElementById('checkout-message');
+            checkoutMessage.textContent = 'Logged out';
+        });
+        const orderHistoryButton = document.getElementById('order-history-button');
+
+orderHistoryButton.addEventListener('click', () => {
+    // Make an Axios GET request to fetch the user's order history
+    axios.get('http://127.0.0.1:8000/order-history/', {
         headers: {
             'Authorization': `Bearer ${token}`
         }
     })
     .then(response => {
-        console.log('Checkout successful:', response.data);
-        cart = {}; // Clear the cart after successful checkout
-        saveCartToLocalStorage();
-        updateCart();
+        // Convert the response data to a JSON string
+        const orderHistoryString = JSON.stringify(response.data, null, 2);
 
-        // Display the user's name after a successful checkout
+        // Handle the response and display the order history as a JSON string
         const checkoutMessage = document.getElementById('checkout-message');
-        checkoutMessage.textContent = `Checkout successful for ${response.data.username}`;
+        checkoutMessage.textContent = 'Order History:\n' + orderHistoryString;
     })
     .catch(error => {
-        console.error('Error during checkout:', error);
+        console.error('Error fetching order history:', error);
     });
 });
-
-
 
 
     </script>
