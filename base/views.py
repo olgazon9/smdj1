@@ -13,7 +13,6 @@ from rest_framework import status
 
 
 
-
 class CheckoutView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -25,11 +24,10 @@ class CheckoutView(APIView):
 
         # Process each item in the cart and create OrderDetails for each item
         order_details = []
-
         for product_id, item in cart_data.items():
             try:
-                product = Product.objects.get(id=product_id)
-            except Product.DoesNotExist:
+                product = Product.objects.get(id=int(product_id))  # Convert the product_id to an integer
+            except (ValueError, Product.DoesNotExist):
                 return Response({'message': f'Product with ID {product_id} does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
             quantity = item.get('quantity', 1)  # Default to 1 if quantity is not provided
@@ -38,20 +36,14 @@ class CheckoutView(APIView):
             # Calculate the total price for this item
             total_price = price * quantity
 
-            # Create an OrderDetails instance and append it to the list
-            order_detail = OrderDetails(
-                order=order,
-                product=product,
-                quantity=quantity,
-                price=price,
-                total_price=total_price
-            )
+            order_detail = OrderDetails(order=order, product=product, quantity=quantity, price=price, total_price=total_price)
             order_details.append(order_detail)
 
         # Save the order details to the database
         OrderDetails.objects.bulk_create(order_details)
 
         return Response({'message': 'Checkout successful'}, status=status.HTTP_201_CREATED)
+
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
