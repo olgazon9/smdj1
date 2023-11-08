@@ -25,7 +25,6 @@ Pygments==2.16.1
 PyJWT==2.8.0
 pypiwin32==223
 pytz==2023.3.post1
-pywin32==306
 requests==2.7.0
 SQLAlchemy==2.0.21
 sqlparse==0.4.4
