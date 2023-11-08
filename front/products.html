@@ -16,7 +16,9 @@
         <ul id="cart-list">
         </ul>
     </div>
+    <p id="checkout-message"></p>
 
+    
     <button id="checkout-button" style="display: block;">Checkout</button>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -115,25 +117,41 @@
                 console.error('Error:', error);
             });
 
-        // Event listener for the checkout button
-        checkoutButton.addEventListener('click', () => {
-            // Define the cart data and send it to the server with the token
-            const cartData = cart;
-            axios.post('http://127.0.0.1:8000/checkout/', cartData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-            .then(response => {
-                console.log('Checkout successful:', response.data);
-                cart = {}; // Clear the cart after successful checkout
-                saveCartToLocalStorage();
-                updateCart();
-            })
-            .catch(error => {
-                console.error('Error during checkout:', error);
-            });
-        });
+// Event listener for the checkout button
+checkoutButton.addEventListener('click', () => {
+    // Create a JSON object that matches the expected format
+    const cartData = {
+        "1": {
+            "quantity": 2
+        },
+        "2": {
+            "quantity": 1
+        },
+    };
+
+    axios.post('http://127.0.0.1:8000/checkout/', cartData, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => {
+        console.log('Checkout successful:', response.data);
+        cart = {}; // Clear the cart after successful checkout
+        saveCartToLocalStorage();
+        updateCart();
+
+        // Display the user's name after a successful checkout
+        const checkoutMessage = document.getElementById('checkout-message');
+        checkoutMessage.textContent = `Checkout successful for ${response.data.username}`;
+    })
+    .catch(error => {
+        console.error('Error during checkout:', error);
+    });
+});
+
+
+
+
     </script>
 </body>
 </html>

@@ -12,12 +12,16 @@ from django.contrib.auth.models import User
 from rest_framework import status
 
 
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .models import Order, OrderDetails, Product
 
 class CheckoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        cart_data = request.data  # Assuming the data sent from the client is a dictionary representing the cart
+        cart_data = request.data
 
         # Create a new order and associate it with the authenticated user
         order = Order.objects.create(user=request.user)
@@ -26,23 +30,23 @@ class CheckoutView(APIView):
         order_details = []
         for product_id, item in cart_data.items():
             try:
-                product = Product.objects.get(id=int(product_id))  # Convert the product_id to an integer
+                product = Product.objects.get(id=int(product_id))
             except (ValueError, Product.DoesNotExist):
                 return Response({'message': f'Product with ID {product_id} does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
-            quantity = item.get('quantity', 1)  # Default to 1 if quantity is not provided
+            quantity = item.get('quantity', 1)
             price = product.price
 
             # Calculate the total price for this item
             total_price = price * quantity
 
-            order_detail = OrderDetails(order=order, product=product, quantity=quantity, price=price, total_price=total_price)
+            # Create an OrderDetails instance for the current item
+            order_detail = OrderDetails(order=order, product_name=product.name, quantity=quantity, price=price)
+            order_detail.save()  # Save the order detail to the database
             order_details.append(order_detail)
 
-        # Save the order details to the database
-        OrderDetails.objects.bulk_create(order_details)
+            return Response({'message': 'Checkout successful', 'username': request.user.username}, status=status.HTTP_201_CREATED)
 
-        return Response({'message': 'Checkout successful'}, status=status.HTTP_201_CREATED)
 
 
 
