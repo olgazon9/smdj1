@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Product List</title>
     <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
     <h1>Product List</h1>
@@ -25,7 +26,6 @@
     <a href="login.html">Go to Login</a>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         const cardContainer = document.querySelector('.card-container');
         const cartList = document.getElementById('cart-list');
@@ -86,7 +86,7 @@
         }
 
         // Make an Axios GET request to fetch the product data
-        axios.get('http://127.0.0.1:8000/products/')
+        axios.get('https://smdj.onrender.com/products/')
             .then(response => {
                 productsData = response.data; // Store product data for later use
                 updateCart(); // Update the cart after loading the products
@@ -95,7 +95,7 @@
                     card.classList.add('card');
 
                     const img = document.createElement('img');
-                    img.setAttribute('src', `http://127.0.0.1:8000${product.image}`);
+                    img.setAttribute('src', `https://smdj.onrender.com${product.image}`);
                     img.setAttribute('alt', product.name);
                     card.appendChild(img);
 
@@ -134,7 +134,7 @@
                 },
             };
 
-            axios.post('http://127.0.0.1:8000/checkout/', cartData, {
+            axios.post('https://smdj.onrender.com/checkout/', cartData, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -166,7 +166,7 @@
 
 orderHistoryButton.addEventListener('click', () => {
     // Make an Axios GET request to fetch the user's order history
-    axios.get('http://127.0.0.1:8000/order-history/', {
+    axios.get('https://smdj.onrender.com/order-history/', {
         headers: {
             'Authorization': `Bearer ${token}`
         }
