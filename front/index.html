@@ -86,7 +86,7 @@
         }
 
         // Make an Axios GET request to fetch the product data
-        axios.get('https://smdj.onrender.com/products/')
+        axios.get('https://smdj.onrender.com/products')
             .then(response => {
                 productsData = response.data; // Store product data for later use
                 updateCart(); // Update the cart after loading the products
